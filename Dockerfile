@@ -1,17 +1,14 @@
-FROM golang:1.24-alpine AS builder
-
+FROM golang:1.25.3-alpine AS builder
+ENV GOTOOLCHAIN=auto
 WORKDIR /app
-COPY go.* ./
+COPY go.mod go.sum ./
 RUN go mod download
-
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o demo-parser .
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
-
 WORKDIR /root/
 COPY --from=builder /app/demo-parser .
-
 EXPOSE 8080
 CMD ["./demo-parser"]
